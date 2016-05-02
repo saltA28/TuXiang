@@ -24,8 +24,8 @@ public class BestConfigChooser extends BaseConfigChooser {
 
     private final int[] mValue = new int[1];
 
-    public BestConfigChooser() {
-        super(new int[] {
+    public BestConfigChooser(int eglContextClientVersion) {
+        super(eglContextClientVersion, new int[] {
                 EGL10.EGL_DEPTH_SIZE, 0,
                 EGL10.EGL_STENCIL_SIZE, 0,
                 EGL10.EGL_NONE});

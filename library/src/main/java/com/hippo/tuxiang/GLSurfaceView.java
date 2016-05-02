@@ -240,17 +240,14 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     public void setRenderer(Renderer renderer) {
         checkRenderThreadState();
         if (mEGLConfigChooser == null) {
-            mEGLConfigChooser = new SimpleEGLConfigChooser(true);
+            mEGLConfigChooser = new SimpleEGLConfigChooser(mEGLContextClientVersion, true);
         }
-        mEGLConfigChooser.setEGLContextClientVersion(mEGLContextClientVersion);
         if (mEGLContextFactory == null) {
-            mEGLContextFactory = new DefaultContextFactory();
+            mEGLContextFactory = new DefaultContextFactory(mEGLContextClientVersion);
         }
-        mEGLContextFactory.setEGLContextClientVersion(mEGLContextClientVersion);
         if (mEGLWindowSurfaceFactory == null) {
             mEGLWindowSurfaceFactory = new DefaultWindowSurfaceFactory();
         }
-        mEGLWindowSurfaceFactory.setEGLContextClientVersion(mEGLContextClientVersion);
         mRenderer = renderer;
         mGLThread = new GLThread(mThisWeakRef);
         mGLThread.start();

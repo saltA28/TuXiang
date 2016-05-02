@@ -31,12 +31,4 @@ public interface EGLWindowSurfaceFactory {
     EGLSurface createWindowSurface(EGL10 egl, EGLDisplay display, EGLConfig config,
             Object nativeWindow);
     void destroySurface(EGL10 egl, EGLDisplay display, EGLSurface surface);
-
-    /**
-     * Implementors typically implement this method by store
-     * the EGLContextClientVersion
-     *
-     * @param version the EGLContextClientVersion
-     */
-    void setEGLContextClientVersion(int version);
 }

@@ -26,9 +26,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
  */
 public class ComponentSizeChooser extends BaseConfigChooser {
 
-    public ComponentSizeChooser(int redSize, int greenSize, int blueSize,
+    public ComponentSizeChooser(int eglContextClientVersion,
+            int redSize, int greenSize, int blueSize,
             int alphaSize, int depthSize, int stencilSize) {
-        super(new int[] {
+        super(eglContextClientVersion, new int[] {
                 EGL10.EGL_RED_SIZE, redSize,
                 EGL10.EGL_GREEN_SIZE, greenSize,
                 EGL10.EGL_BLUE_SIZE, blueSize,

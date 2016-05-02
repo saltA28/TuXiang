@@ -28,11 +28,10 @@ public class DefaultContextFactory implements EGLContextFactory {
 
     private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
 
-    private int mEGLContextClientVersion;
+    private final int mEGLContextClientVersion;
 
-    @Override
-    public void setEGLContextClientVersion(int version) {
-        mEGLContextClientVersion = version;
+    public DefaultContextFactory(int eglContextClientVersion) {
+        mEGLContextClientVersion = eglContextClientVersion;
     }
 
     @Override

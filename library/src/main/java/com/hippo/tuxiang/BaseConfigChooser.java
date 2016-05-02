@@ -22,15 +22,11 @@ import javax.microedition.khronos.egl.EGLDisplay;
 
 public abstract class BaseConfigChooser implements EGLConfigChooser {
 
-    private int mEGLContextClientVersion;
+    private final int mEGLContextClientVersion;
 
-    public BaseConfigChooser(int[] configSpec) {
+    public BaseConfigChooser(int eglContextClientVersion, int[] configSpec) {
+        mEGLContextClientVersion = eglContextClientVersion;
         mConfigSpec = filterConfigSpec(configSpec);
-    }
-
-    @Override
-    public void setEGLContextClientVersion(int version) {
-        mEGLContextClientVersion = version;
     }
 
     @Override

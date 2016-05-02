@@ -35,12 +35,4 @@ public interface EGLConfigChooser {
      * @return the chosen configuration.
      */
     EGLConfig chooseConfig(EGL10 egl, EGLDisplay display);
-
-    /**
-     * Implementors typically implement this method by store
-     * the EGLContextClientVersion
-     *
-     * @param version the EGLContextClientVersion
-     */
-    void setEGLContextClientVersion(int version);
 }

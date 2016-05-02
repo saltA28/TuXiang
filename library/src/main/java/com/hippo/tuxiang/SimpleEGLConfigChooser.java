@@ -22,7 +22,7 @@ package com.hippo.tuxiang;
  *
  */
 public class SimpleEGLConfigChooser extends ComponentSizeChooser {
-    public SimpleEGLConfigChooser(boolean withDepthBuffer) {
-        super(8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0);
+    public SimpleEGLConfigChooser(int eglContextClientVersion, boolean withDepthBuffer) {
+        super(eglContextClientVersion, 8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0);
     }
 }

@@ -26,9 +26,6 @@ import javax.microedition.khronos.egl.EGLSurface;
 public class DefaultWindowSurfaceFactory implements EGLWindowSurfaceFactory {
 
     @Override
-    public void setEGLContextClientVersion(int version) {}
-
-    @Override
     public EGLSurface createWindowSurface(EGL10 egl, EGLDisplay display,
             EGLConfig config, Object nativeWindow) {
         EGLSurface result = null;
