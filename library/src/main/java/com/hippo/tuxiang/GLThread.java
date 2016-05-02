@@ -126,6 +126,14 @@ class GLThread extends Thread {
                             if (LOG_DEBUG) {
                                 Log.i("GLThread", "mPaused is now " + mPaused + " tid=" + getId());
                             }
+                            GLStuff stuff = mGLStuffWeakRef.get();
+                            if (stuff != null) {
+                                if (pausing) {
+                                    stuff.getRenderer().onPause();
+                                } else {
+                                    stuff.getRenderer().onResume();
+                                }
+                            }
                         }
 
                         // Do we need to give up the EGL context?

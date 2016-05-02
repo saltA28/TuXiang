@@ -118,4 +118,14 @@ public interface Renderer {
      * Called when the surface destroyed.
      */
     void onSurfaceDestroyed();
+
+    /**
+     * Called when render thread will wait
+     */
+    void onPause();
+
+    /**
+     * Called when render thread weak from waiting
+     */
+    void onResume();
 }
