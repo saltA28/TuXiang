@@ -39,21 +39,21 @@ public class BestConfigChooser extends BaseConfigChooser {
         int maxScore = 0;
 
         for (int i = 0, n = configs.length; i < n; i++) {
-            EGLConfig config = configs[i];
-            int redSize = findConfigAttrib(egl, display, config,
+            final EGLConfig config = configs[i];
+            final int redSize = findConfigAttrib(egl, display, config,
                     EGL10.EGL_RED_SIZE, 0);
-            int greenSize = findConfigAttrib(egl, display, config,
+            final int greenSize = findConfigAttrib(egl, display, config,
                     EGL10.EGL_GREEN_SIZE, 0);
-            int blueSize = findConfigAttrib(egl, display, config,
+            final int blueSize = findConfigAttrib(egl, display, config,
                     EGL10.EGL_BLUE_SIZE, 0);
-            int alphaSize = findConfigAttrib(egl, display, config,
+            final int alphaSize = findConfigAttrib(egl, display, config,
                     EGL10.EGL_ALPHA_SIZE, 0);
-            int sampleBuffers = findConfigAttrib(egl, display, config,
+            final int sampleBuffers = findConfigAttrib(egl, display, config,
                     EGL10.EGL_SAMPLE_BUFFERS, 0);
-            int samples = findConfigAttrib(egl, display, config,
+            final int samples = findConfigAttrib(egl, display, config,
                     EGL10.EGL_SAMPLES, 0);
 
-            int score = redSize + greenSize + blueSize + alphaSize +
+            final int score = redSize + greenSize + blueSize + alphaSize +
                     sampleBuffers + samples;
 
             if (score > maxScore) {
@@ -67,7 +67,6 @@ public class BestConfigChooser extends BaseConfigChooser {
 
     private int findConfigAttrib(EGL10 egl, EGLDisplay display,
             EGLConfig config, int attribute, int defaultValue) {
-
         if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
             return mValue[0];
         }

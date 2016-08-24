@@ -16,10 +16,11 @@
 
 package com.hippo.tuxiang;
 
+// android-7.0.0_r1
+
 /**
  * This class will choose a RGB_888 surface with
  * or without a depth buffer.
- *
  */
 public class SimpleEGLConfigChooser extends ComponentSizeChooser {
     public SimpleEGLConfigChooser(int eglContextClientVersion, boolean withDepthBuffer) {

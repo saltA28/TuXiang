@@ -18,7 +18,17 @@ package com.hippo.tuxiang;
 
 import javax.microedition.khronos.opengles.GL;
 
+// android-7.0.0_r1
+
 public interface GLStuff {
+
+    boolean LOG_ATTACH_DETACH = false;
+    boolean LOG_THREADS = false;
+    boolean LOG_PAUSE_RESUME = false;
+    boolean LOG_SURFACE = false;
+    boolean LOG_RENDERER = false;
+    boolean LOG_RENDERER_DRAW_FRAME = false;
+    boolean LOG_EGL = false;
 
     /**
      * The renderer only renders

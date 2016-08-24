@@ -21,8 +21,13 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
+// android-7.0.0_r1
+
 /**
  * An interface for customizing the eglCreateWindowSurface and eglDestroySurface calls.
+ * <p>
+ * This interface must be implemented by clients wishing to call
+ * {@link GLStuff#setEGLWindowSurfaceFactory(EGLWindowSurfaceFactory)}
  */
 public interface EGLWindowSurfaceFactory {
     /**

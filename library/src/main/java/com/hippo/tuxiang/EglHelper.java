@@ -31,6 +31,8 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+// android-7.0.0_r1
+
 /**
  * An EGL helper class.
  */
@@ -43,7 +45,7 @@ class EglHelper {
      * Initialize EGL for a given configuration spec.
      */
     public void start() {
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_EGL) {
             Log.w("EglHelper", "start() tid=" + Thread.currentThread().getId());
         }
         /*
@@ -63,11 +65,11 @@ class EglHelper {
         /*
          * We can now initialize EGL for that display
          */
-        int[] version = new int[2];
+        final int[] version = new int[2];
         if(!mEgl.eglInitialize(mEglDisplay, version)) {
             throw new RuntimeException("eglInitialize failed");
         }
-        GLStuff stuff = mGLStuffViewWeakRef.get();
+        final GLStuff stuff = mGLStuffViewWeakRef.get();
         if (stuff == null) {
             mEglConfig = null;
             mEglContext = null;
@@ -84,7 +86,7 @@ class EglHelper {
             mEglContext = null;
             throwEglException("createContext");
         }
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_EGL) {
             Log.w("EglHelper", "createContext " + mEglContext + " tid=" + Thread.currentThread().getId());
         }
 
@@ -98,7 +100,7 @@ class EglHelper {
      * @return true if the surface was created successfully.
      */
     public boolean createSurface() {
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_EGL) {
             Log.w("EglHelper", "createSurface()  tid=" + Thread.currentThread().getId());
         }
         /*
@@ -123,7 +125,7 @@ class EglHelper {
         /*
          * Create an EGL surface we can render into.
          */
-        GLStuff stuff = mGLStuffViewWeakRef.get();
+        final GLStuff stuff = mGLStuffViewWeakRef.get();
         if (stuff != null) {
             mEglSurface = stuff.getEGLWindowSurfaceFactory().createWindowSurface(mEgl,
                     mEglDisplay, mEglConfig, stuff.getNativeWindow());
@@ -132,7 +134,7 @@ class EglHelper {
         }
 
         if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
-            int error = mEgl.eglGetError();
+            final int error = mEgl.eglGetError();
             if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
                 Log.e("EglHelper", "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
             }
@@ -161,14 +163,14 @@ class EglHelper {
     GL createGL() {
 
         GL gl = mEglContext.getGL();
-        GLStuff stuff = mGLStuffViewWeakRef.get();
+        final GLStuff stuff = mGLStuffViewWeakRef.get();
         if (stuff != null) {
-            GLWrapper glWrapper = stuff.getGLWrapper();
+            final GLWrapper glWrapper = stuff.getGLWrapper();
             if (glWrapper != null) {
                 gl = glWrapper.wrap(gl);
             }
 
-            int debugFlags = stuff.getDebugFlags();
+            final int debugFlags = stuff.getDebugFlags();
             if ((debugFlags & (GLStuff.DEBUG_CHECK_GL_ERROR | GLStuff.DEBUG_LOG_GL_CALLS)) != 0) {
                 int configFlags = 0;
                 Writer log = null;
@@ -196,7 +198,7 @@ class EglHelper {
     }
 
     public void destroySurface() {
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_EGL) {
             Log.w("EglHelper", "destroySurface()  tid=" + Thread.currentThread().getId());
         }
         destroySurfaceImp();
@@ -207,7 +209,7 @@ class EglHelper {
             mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
                     EGL10.EGL_NO_SURFACE,
                     EGL10.EGL_NO_CONTEXT);
-            GLStuff stuff = mGLStuffViewWeakRef.get();
+            final GLStuff stuff = mGLStuffViewWeakRef.get();
             if (stuff != null) {
                 stuff.getEGLWindowSurfaceFactory().destroySurface(mEgl, mEglDisplay, mEglSurface);
             }
@@ -216,11 +218,11 @@ class EglHelper {
     }
 
     public void finish() {
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_EGL) {
             Log.w("EglHelper", "finish() tid=" + Thread.currentThread().getId());
         }
         if (mEglContext != null) {
-            GLStuff stuff = mGLStuffViewWeakRef.get();
+            final GLStuff stuff = mGLStuffViewWeakRef.get();
             if (stuff != null) {
                 stuff.getEGLContextFactory().destroyContext(mEgl, mEglDisplay, mEglContext);
             }
@@ -237,8 +239,8 @@ class EglHelper {
     }
 
     public static void throwEglException(String function, int error) {
-        String message = formatEglError(function, error);
-        if (LOG_DEBUG) {
+        final String message = formatEglError(function, error);
+        if (GLStuff.LOG_THREADS) {
             Log.e("EglHelper", "throwEglException tid=" + Thread.currentThread().getId() + " "
                     + message);
         }
@@ -252,8 +254,6 @@ class EglHelper {
     public static String formatEglError(String function, int error) {
         return function + " failed: " + GLUtils.getEGLErrorString(error);
     }
-
-    private static final boolean LOG_DEBUG = false;
 
     private final WeakReference<GLStuff> mGLStuffViewWeakRef;
     EGL10 mEgl;
@@ -275,7 +275,7 @@ class EglHelper {
 
         @Override public void write(@NonNull char[] buf, int offset, int count) {
             for(int i = 0; i < count; i++) {
-                char c = buf[offset + i];
+                final char c = buf[offset + i];
                 if ( c == '\n') {
                     flushBuilder();
                 }

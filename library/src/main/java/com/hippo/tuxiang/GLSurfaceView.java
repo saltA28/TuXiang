@@ -24,6 +24,8 @@ import android.view.SurfaceView;
 
 import java.lang.ref.WeakReference;
 
+// android-7.0.0_r1
+
 /**
  * An implementation of SurfaceView that uses the dedicated surface for
  * displaying OpenGL rendering.
@@ -145,9 +147,8 @@ import java.lang.ref.WeakReference;
  * </pre>
  *
  */
-public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder.Callback {
+public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder.Callback2 {
     private final static String TAG = "GLSurfaceView";
-    private final static boolean LOG_ATTACH_DETACH = false;
 
     /**
      * Standard View constructor. In order to render something, you
@@ -343,6 +344,17 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         mGLThread.onWindowResize(w, h);
+    }
+
+    /**
+     * This method is part of the SurfaceHolder.Callback interface, and is
+     * not normally called or subclassed by clients of GLSurfaceView.
+     */
+    @Override
+    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+        if (mGLThread != null) {
+            mGLThread.requestRenderAndWait();
+        }
     }
 
     @Override

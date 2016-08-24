@@ -18,6 +18,8 @@ package com.hippo.tuxiang;
 
 import javax.microedition.khronos.opengles.GL;
 
+// android-7.0.0_r1
+
 /**
  * An interface used to wrap a GL interface.
  * <p>Typically

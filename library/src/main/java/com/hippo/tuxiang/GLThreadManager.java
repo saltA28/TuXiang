@@ -20,6 +20,8 @@ import android.util.Log;
 
 import javax.microedition.khronos.opengles.GL10;
 
+// android-7.0.0_r1
+
 final class GLThreadManager {
     private static final String TAG = "GLThreadManager";
     private static final boolean LOG_DEBUG = false;
@@ -36,7 +38,7 @@ final class GLThreadManager {
     private GLThreadManager() {}
 
     public synchronized void threadExiting(GLThread thread) {
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_THREADS) {
             Log.i("GLThread", "exiting tid=" +  thread.getId());
         }
         thread.mExited = true;
@@ -106,7 +108,7 @@ final class GLThreadManager {
                 notifyAll();
             }
             mLimitedGLESContexts = !mMultipleGLESContextsAllowed;
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_SURFACE) {
                 Log.w(TAG, "checkGLDriver renderer = \"" + renderer + "\" multipleContextsAllowed = "
                         + mMultipleGLESContextsAllowed
                         + " mLimitedGLESContexts = " + mLimitedGLESContexts);
@@ -121,7 +123,7 @@ final class GLThreadManager {
             if (mGLESVersion >= kGLES_20) {
                 mMultipleGLESContextsAllowed = true;
             }
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_SURFACE) {
                 Log.w(TAG, "checkGLESVersion mGLESVersion =" +
                         " " + mGLESVersion + " mMultipleGLESContextsAllowed = " + mMultipleGLESContextsAllowed);
             }

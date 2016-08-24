@@ -20,9 +20,14 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
+// android-7.0.0_r1
+
 /**
  * An interface for choosing an EGLConfig configuration from a list of
  * potential configurations.
+ * <p>
+ * This interface must be implemented by clients wishing to call
+ * {@link GLStuff#setEGLConfigChooser(EGLConfigChooser)}
  */
 public interface EGLConfigChooser {
     /**

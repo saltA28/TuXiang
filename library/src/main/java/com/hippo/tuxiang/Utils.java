@@ -17,6 +17,7 @@
 package com.hippo.tuxiang;
 
 import android.content.pm.ConfigurationInfo;
+import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,23 +34,24 @@ final class Utils {
         return sGLESVersion;
     }
 
+    @SuppressWarnings("TryWithIdenticalCatches")
     private static int getGLESVersionInternal() {
         try {
-            Class<?> clazz = Class.forName("android.os.SystemProperties");
-            Method method = clazz.getMethod("getInt", String.class, int.class);
-            Object result = method.invoke(null, "ro.opengles.version",
+            final Class<?> clazz = Class.forName("android.os.SystemProperties");
+            final Method method = clazz.getMethod("getInt", String.class, int.class);
+            final Object result = method.invoke(null, "ro.opengles.version",
                     ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
             if (result instanceof Integer) {
                 return (Integer) result;
             }
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.e("TuXiang", "Can't get GLES version.", e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.e("TuXiang", "Can't get GLES version.", e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            Log.e("TuXiang", "Can't get GLES version.", e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Log.e("TuXiang", "Can't get GLES version.", e);
         }
         return ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
     }

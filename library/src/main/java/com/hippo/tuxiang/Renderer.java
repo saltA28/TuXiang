@@ -19,10 +19,16 @@ package com.hippo.tuxiang;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+// android-7.0.0_r1
+
 /**
  * A generic renderer interface.
  * <p>
  * The renderer is responsible for making OpenGL calls to render a frame.
+ * <p>
+ * GLSurfaceView clients typically create their own classes that implement
+ * this interface, and then call {@link GLStuff#setRenderer} to
+ * register the renderer with the GLSurfaceView.
  * <p>
  *
  * <div class="special reference">
@@ -36,7 +42,8 @@ import javax.microedition.khronos.opengles.GL10;
  * performance is decoupled from the UI thread. Clients typically need to
  * communicate with the renderer from the UI thread, because that's where
  * input events are received. Clients can communicate using any of the
- * standard Java techniques for cross-thread communication.
+ * standard Java techniques for cross-thread communication, or they can
+ * use the {@link GLStuff#queueEvent(Runnable)} convenience method.
  * <p>
  * <h3>EGL Context Lost</h3>
  * There are situations where the EGL rendering context will be lost. This
@@ -46,6 +53,8 @@ import javax.microedition.khronos.opengles.GL10;
  * keep rendering correctly, a renderer must recreate any lost resources
  * that it still needs. The {@link #onSurfaceCreated(GL10, EGLConfig)} method
  * is a convenient place to do this.
+ *
+ * @see GLStuff#setRenderer(Renderer)
  */
 public interface Renderer {
     /**

@@ -13,7 +13,6 @@ import java.lang.ref.WeakReference;
  */
 public class GLTextureView extends TextureView implements GLStuff, TextureView.SurfaceTextureListener {
     private final static String TAG = "GLSurfaceView";
-    private final static boolean LOG_ATTACH_DETACH = false;
 
     public GLTextureView(Context context) {
         super(context);

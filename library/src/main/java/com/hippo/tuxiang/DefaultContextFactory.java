@@ -16,13 +16,14 @@
 
 package com.hippo.tuxiang;
 
-import android.opengl.GLUtils;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
+
+// android-7.0.0_r1
 
 public class DefaultContextFactory implements EGLContextFactory {
 
@@ -36,7 +37,7 @@ public class DefaultContextFactory implements EGLContextFactory {
 
     @Override
     public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config) {
-        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, mEGLContextClientVersion,
+        final int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, mEGLContextClientVersion,
                 EGL10.EGL_NONE };
 
         return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT,
@@ -48,7 +49,10 @@ public class DefaultContextFactory implements EGLContextFactory {
             EGLContext context) {
         if (!egl.eglDestroyContext(display, context)) {
             Log.e("DefaultContextFactory", "display:" + display + " context: " + context);
-            throw new RuntimeException("eglDestroyContex failed: " + GLUtils.getEGLErrorString(egl.eglGetError()));
+            if (GLStuff.LOG_THREADS) {
+                Log.i("DefaultContextFactory", "tid=" + Thread.currentThread().getId());
+            }
+            EglHelper.throwEglException("eglDestroyContex", egl.eglGetError());
         }
     }
 }

@@ -25,6 +25,8 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.opengles.GL10;
 
+// android-7.0.0_r1
+
 /**
  * A generic GL Thread. Takes care of initializing EGL and GL. Delegates
  * to a Renderer instance to do the actual drawing. Can be configured to
@@ -41,6 +43,7 @@ class GLThread extends Thread {
         mHeight = 0;
         mRequestRender = true;
         mRenderMode = GLStuff.RENDERMODE_CONTINUOUSLY;
+        mWantRenderNotification = false;
         mGLStuffWeakRef = glStuffWeakRef;
         mGLThreadManager = GLThreadManager.getInstance();
     }
@@ -48,7 +51,7 @@ class GLThread extends Thread {
     @Override
     public void run() {
         setName("GLThread " + getId());
-        if (LOG_DEBUG) {
+        if (GLStuff.LOG_THREADS) {
             Log.i("GLThread", "starting tid=" + getId());
         }
 
@@ -57,7 +60,7 @@ class GLThread extends Thread {
         } catch (InterruptedException e) {
             // fall thru and exit normally
         } finally {
-            GLStuff stuff = mGLStuffWeakRef.get();
+            final GLStuff stuff = mGLStuffWeakRef.get();
             if (stuff != null) {
                 stuff.getRenderer().onSurfaceDestroyed();
             }
@@ -87,10 +90,13 @@ class GLThread extends Thread {
             mGLThreadManager.releaseEglContextLocked(this);
         }
     }
+
     private void guardedRun() throws InterruptedException {
         mEglHelper = new EglHelper(mGLStuffWeakRef);
         mHaveEglContext = false;
         mHaveEglSurface = false;
+        mWantRenderNotification = false;
+
         try {
             GL10 gl = null;
             boolean createEglContext = false;
@@ -123,10 +129,10 @@ class GLThread extends Thread {
                             pausing = mRequestPaused;
                             mPaused = mRequestPaused;
                             mGLThreadManager.notifyAll();
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_PAUSE_RESUME) {
                                 Log.i("GLThread", "mPaused is now " + mPaused + " tid=" + getId());
                             }
-                            GLStuff stuff = mGLStuffWeakRef.get();
+                            final GLStuff stuff = mGLStuffWeakRef.get();
                             if (stuff != null) {
                                 if (pausing) {
                                     stuff.getRenderer().onPause();
@@ -138,7 +144,7 @@ class GLThread extends Thread {
 
                         // Do we need to give up the EGL context?
                         if (mShouldReleaseEglContext) {
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_SURFACE) {
                                 Log.i("GLThread", "releasing EGL context because asked to tid=" + getId());
                             }
                             stopEglSurfaceLocked();
@@ -156,7 +162,7 @@ class GLThread extends Thread {
 
                         // When pausing, release the EGL surface:
                         if (pausing && mHaveEglSurface) {
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_SURFACE) {
                                 Log.i("GLThread", "releasing EGL surface because paused tid=" + getId());
                             }
                             stopEglSurfaceLocked();
@@ -164,11 +170,11 @@ class GLThread extends Thread {
 
                         // When pausing, optionally release the EGL Context:
                         if (pausing && mHaveEglContext) {
-                            GLStuff stuff = mGLStuffWeakRef.get();
-                            boolean preserveEglContextOnPause = stuff != null && stuff.getPreserveEGLContextOnPause();
+                            final GLStuff stuff = mGLStuffWeakRef.get();
+                            final boolean preserveEglContextOnPause = stuff != null && stuff.getPreserveEGLContextOnPause();
                             if (!preserveEglContextOnPause || mGLThreadManager.shouldReleaseEGLContextWhenPausing()) {
                                 stopEglContextLocked();
-                                if (LOG_DEBUG) {
+                                if (GLStuff.LOG_SURFACE) {
                                     Log.i("GLThread", "releasing EGL context because paused tid=" + getId());
                                 }
                             }
@@ -178,7 +184,7 @@ class GLThread extends Thread {
                         if (pausing) {
                             if (mGLThreadManager.shouldTerminateEGLWhenPausing()) {
                                 mEglHelper.finish();
-                                if (LOG_DEBUG) {
+                                if (GLStuff.LOG_SURFACE) {
                                     Log.i("GLThread", "terminating EGL because paused tid=" + getId());
                                 }
                             }
@@ -186,7 +192,7 @@ class GLThread extends Thread {
 
                         // Have we lost the SurfaceView surface?
                         if ((! mHasSurface) && (! mWaitingForSurface)) {
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_SURFACE) {
                                 Log.i("GLThread", "noticed surfaceView surface lost tid=" + getId());
                             }
                             if (mHaveEglSurface) {
@@ -199,7 +205,7 @@ class GLThread extends Thread {
 
                         // Have we acquired the surface view surface?
                         if (mHasSurface && mWaitingForSurface) {
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_SURFACE) {
                                 Log.i("GLThread", "noticed surfaceView surface acquired tid=" + getId());
                             }
                             mWaitingForSurface = false;
@@ -207,10 +213,10 @@ class GLThread extends Thread {
                         }
 
                         if (doRenderNotification) {
-                            if (LOG_DEBUG) {
+                            if (GLStuff.LOG_SURFACE) {
                                 Log.i("GLThread", "sending render notification tid=" + getId());
                             }
-                            wantRenderNotification = false;
+                            mWantRenderNotification = false;
                             doRenderNotification = false;
                             mRenderComplete = true;
                             mGLThreadManager.notifyAll();
@@ -249,8 +255,8 @@ class GLThread extends Thread {
                                     sizeChanged = true;
                                     w = mWidth;
                                     h = mHeight;
-                                    wantRenderNotification = true;
-                                    if (LOG_DEBUG) {
+                                    mWantRenderNotification = true;
+                                    if (GLStuff.LOG_SURFACE) {
                                         Log.i("GLThread",
                                                 "noticing that we want render notification tid="
                                                         + getId());
@@ -263,12 +269,15 @@ class GLThread extends Thread {
                                 }
                                 mRequestRender = false;
                                 mGLThreadManager.notifyAll();
+                                if (mWantRenderNotification) {
+                                    wantRenderNotification = true;
+                                }
                                 break;
                             }
                         }
 
                         // By design, this is the only place in a GLThread thread where we wait().
-                        if (LOG_DEBUG) {
+                        if (GLStuff.LOG_THREADS) {
                             Log.i("GLThread", "waiting tid=" + getId()
                                     + " mHaveEglContext: " + mHaveEglContext
                                     + " mHaveEglSurface: " + mHaveEglSurface
@@ -293,7 +302,7 @@ class GLThread extends Thread {
                 }
 
                 if (createEglSurface) {
-                    if (LOG_DEBUG) {
+                    if (GLStuff.LOG_SURFACE) {
                         Log.w("GLThread", "egl createSurface");
                     }
                     if (mEglHelper.createSurface()) {
@@ -320,10 +329,10 @@ class GLThread extends Thread {
                 }
 
                 if (createEglContext) {
-                    if (LOG_DEBUG) {
+                    if (GLStuff.LOG_RENDERER) {
                         Log.w("GLThread", "onSurfaceCreated");
                     }
-                    GLStuff stuff = mGLStuffWeakRef.get();
+                    final GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         stuff.getRenderer().onSurfaceCreated(gl, mEglHelper.mEglConfig);
                     }
@@ -331,31 +340,31 @@ class GLThread extends Thread {
                 }
 
                 if (sizeChanged) {
-                    if (LOG_DEBUG) {
+                    if (GLStuff.LOG_RENDERER) {
                         Log.w("GLThread", "onSurfaceChanged(" + w + ", " + h + ")");
                     }
-                    GLStuff stuff = mGLStuffWeakRef.get();
+                    final GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         stuff.getRenderer().onSurfaceChanged(gl, w, h);
                     }
                     sizeChanged = false;
                 }
 
-                if (LOG_DEBUG) {
+                if (GLStuff.LOG_RENDERER_DRAW_FRAME) {
                     Log.w("GLThread", "onDrawFrame tid=" + getId());
                 }
                 {
-                    GLStuff stuff = mGLStuffWeakRef.get();
+                    final GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         stuff.getRenderer().onDrawFrame(gl);
                     }
                 }
-                int swapError = mEglHelper.swap();
+                final int swapError = mEglHelper.swap();
                 switch (swapError) {
                     case EGL10.EGL_SUCCESS:
                         break;
                     case EGL11.EGL_CONTEXT_LOST:
-                        if (LOG_DEBUG) {
+                        if (GLStuff.LOG_SURFACE) {
                             Log.i("GLThread", "egl context lost tid=" + getId());
                         }
                         lostEglContext = true;
@@ -376,6 +385,7 @@ class GLThread extends Thread {
 
                 if (wantRenderNotification) {
                     doRenderNotification = true;
+                    wantRenderNotification = false;
                 }
             }
 
@@ -423,9 +433,36 @@ class GLThread extends Thread {
         }
     }
 
+    public void requestRenderAndWait() {
+        synchronized(mGLThreadManager) {
+            // If we are already on the GL thread, this means a client callback
+            // has caused reentrancy, for example via updating the SurfaceView parameters.
+            // We will return to the client rendering code, so here we don't need to
+            // do anything.
+            if (Thread.currentThread() == this) {
+                return;
+            }
+
+            mWantRenderNotification = true;
+            mRequestRender = true;
+            mRenderComplete = false;
+
+            mGLThreadManager.notifyAll();
+
+            while (!mExited && !mPaused && !mRenderComplete && ableToDraw()) {
+                try {
+                    mGLThreadManager.wait();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+        }
+    }
+
     public void surfaceCreated() {
         synchronized(mGLThreadManager) {
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_THREADS) {
                 Log.i("GLThread", "surfaceCreated tid=" + getId());
             }
             mHasSurface = true;
@@ -445,7 +482,7 @@ class GLThread extends Thread {
 
     public void surfaceDestroyed() {
         synchronized(mGLThreadManager) {
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_THREADS) {
                 Log.i("GLThread", "surfaceDestroyed tid=" + getId());
             }
             mHasSurface = false;
@@ -462,13 +499,13 @@ class GLThread extends Thread {
 
     public void onPause() {
         synchronized (mGLThreadManager) {
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_PAUSE_RESUME) {
                 Log.i("GLThread", "onPause tid=" + getId());
             }
             mRequestPaused = true;
             mGLThreadManager.notifyAll();
             while ((! mExited) && (! mPaused)) {
-                if (LOG_DEBUG) {
+                if (GLStuff.LOG_PAUSE_RESUME) {
                     Log.i("Main thread", "onPause waiting for mPaused.");
                 }
                 try {
@@ -482,7 +519,7 @@ class GLThread extends Thread {
 
     public void onResume() {
         synchronized (mGLThreadManager) {
-            if (LOG_DEBUG) {
+            if (GLStuff.LOG_PAUSE_RESUME) {
                 Log.i("GLThread", "onResume tid=" + getId());
             }
             mRequestPaused = false;
@@ -490,7 +527,7 @@ class GLThread extends Thread {
             mRenderComplete = false;
             mGLThreadManager.notifyAll();
             while ((! mExited) && mPaused && (!mRenderComplete)) {
-                if (LOG_DEBUG) {
+                if (GLStuff.LOG_PAUSE_RESUME) {
                     Log.i("Main thread", "onResume waiting for !mPaused.");
                 }
                 try {
@@ -509,12 +546,22 @@ class GLThread extends Thread {
             mSizeChanged = true;
             mRequestRender = true;
             mRenderComplete = false;
+
+            // If we are already on the GL thread, this means a client callback
+            // has caused reentrancy, for example via updating the SurfaceView parameters.
+            // We need to process the size change eventually though and update our EGLSurface.
+            // So we set the parameters and return so they can be processed on our
+            // next iteration.
+            if (Thread.currentThread() == this) {
+                return;
+            }
+
             mGLThreadManager.notifyAll();
 
             // Wait for thread to react to resize and render a frame
             while (! mExited && !mPaused && !mRenderComplete
                     && ableToDraw()) {
-                if (LOG_DEBUG) {
+                if (GLStuff.LOG_SURFACE) {
                     Log.i("Main thread", "onWindowResize waiting for render complete from tid=" + getId());
                 }
                 try {
@@ -561,8 +608,6 @@ class GLThread extends Thread {
         }
     }
 
-    private static final boolean LOG_DEBUG = false;
-
     // Once the thread is started, all accesses to the following member
     // variables are protected by the mGLThreadManager monitor
     private boolean mShouldExit;
@@ -580,6 +625,7 @@ class GLThread extends Thread {
     private int mHeight;
     private int mRenderMode;
     private boolean mRequestRender;
+    private boolean mWantRenderNotification;
     private boolean mRenderComplete;
     private final ArrayList<Runnable> mEventQueue = new ArrayList<>();
     private boolean mSizeChanged = true;
