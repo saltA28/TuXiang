@@ -124,17 +124,25 @@ public interface Renderer {
     void onDrawFrame(GL10 gl);
 
     /**
-     * Called when the surface destroyed.
+     * Called when the GL thread exits.
+     * <p>
+     * GL thread ends after {@link android.view.View#onDetachedFromWindow} called.
+     * <p>
+     * It is a good time to release resources.
      */
-    void onSurfaceDestroyed();
+    void onGLThreadExits();
 
     /**
-     * Called when render thread will wait
+     * Called after {@link GLStuff#onPause()} called.
+     * <p>
+     * It is a good time to stop animations.
      */
-    void onPause();
+    void onGLThreadPause();
 
     /**
-     * Called when render thread weak from waiting
+     * Called after {@link GLStuff#onResume()} called.
+     * <p>
+     * It is a good time to restart animations.
      */
-    void onResume();
+    void onGLThreadResume();
 }

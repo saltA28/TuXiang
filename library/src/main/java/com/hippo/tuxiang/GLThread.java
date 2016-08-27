@@ -62,7 +62,7 @@ class GLThread extends Thread {
         } finally {
             final GLStuff stuff = mGLStuffWeakRef.get();
             if (stuff != null) {
-                stuff.getRenderer().onSurfaceDestroyed();
+                stuff.getRenderer().onGLThreadExits();
             }
             mGLThreadManager.threadExiting(this);
         }
@@ -135,9 +135,9 @@ class GLThread extends Thread {
                             final GLStuff stuff = mGLStuffWeakRef.get();
                             if (stuff != null) {
                                 if (pausing) {
-                                    stuff.getRenderer().onPause();
+                                    stuff.getRenderer().onGLThreadPause();
                                 } else {
-                                    stuff.getRenderer().onResume();
+                                    stuff.getRenderer().onGLThreadResume();
                                 }
                             }
                         }
