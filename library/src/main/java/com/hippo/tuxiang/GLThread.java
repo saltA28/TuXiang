@@ -55,12 +55,20 @@ class GLThread extends Thread {
             Log.i("GLThread", "starting tid=" + getId());
         }
 
+        GLStuff stuff;
+
+        stuff = mGLStuffWeakRef.get();
+        if (stuff != null) {
+            stuff.getRenderer().onGLThreadStarts();
+            stuff = null;
+        }
+
         try {
             guardedRun();
         } catch (InterruptedException e) {
             // fall thru and exit normally
         } finally {
-            final GLStuff stuff = mGLStuffWeakRef.get();
+            stuff = mGLStuffWeakRef.get();
             if (stuff != null) {
                 stuff.getRenderer().onGLThreadExits();
             }

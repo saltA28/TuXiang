@@ -126,6 +126,17 @@ public interface Renderer {
     /**
      * Called when the GL thread exits.
      * <p>
+     * GL thread starts after {@link GLStuff#setRenderer(Renderer)} called, and
+     * after {@link android.view.View#onDetachedFromWindow} called except
+     * the first time.
+     * <p>
+     * It is a good time to prepare resources.
+     */
+    void onGLThreadStarts();
+
+    /**
+     * Called when the GL thread exits.
+     * <p>
      * GL thread ends after {@link android.view.View#onDetachedFromWindow} called.
      * <p>
      * It is a good time to release resources.
