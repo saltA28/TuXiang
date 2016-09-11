@@ -120,8 +120,9 @@ public interface Renderer {
      * </pre>
      * @param gl the GL interface. Use <code>instanceof</code> to
      * test if the interface supports GL11 or higher interfaces.
+     * @return {@code false} for not drew, will not swap buffers.
      */
-    void onDrawFrame(GL10 gl);
+    boolean onDrawFrame(GL10 gl);
 
     /**
      * Called when the GL thread exits.

@@ -361,34 +361,37 @@ class GLThread extends Thread {
                 if (GLStuff.LOG_RENDERER_DRAW_FRAME) {
                     Log.w("GLThread", "onDrawFrame tid=" + getId());
                 }
+                boolean drew = false;
                 {
                     final GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
-                        stuff.getRenderer().onDrawFrame(gl);
+                        drew = stuff.getRenderer().onDrawFrame(gl);
                     }
                 }
-                final int swapError = mEglHelper.swap();
-                switch (swapError) {
-                    case EGL10.EGL_SUCCESS:
-                        break;
-                    case EGL11.EGL_CONTEXT_LOST:
-                        if (GLStuff.LOG_SURFACE) {
-                            Log.i("GLThread", "egl context lost tid=" + getId());
-                        }
-                        lostEglContext = true;
-                        break;
-                    default:
-                        // Other errors typically mean that the current surface is bad,
-                        // probably because the SurfaceView surface has been destroyed,
-                        // but we haven't been notified yet.
-                        // Log the error to help developers understand why rendering stopped.
-                        EglHelper.logEglErrorAsWarning("GLThread", "eglSwapBuffers", swapError);
+                if (drew) {
+                    final int swapError = mEglHelper.swap();
+                    switch (swapError) {
+                        case EGL10.EGL_SUCCESS:
+                            break;
+                        case EGL11.EGL_CONTEXT_LOST:
+                            if (GLStuff.LOG_SURFACE) {
+                                Log.i("GLThread", "egl context lost tid=" + getId());
+                            }
+                            lostEglContext = true;
+                            break;
+                        default:
+                            // Other errors typically mean that the current surface is bad,
+                            // probably because the SurfaceView surface has been destroyed,
+                            // but we haven't been notified yet.
+                            // Log the error to help developers understand why rendering stopped.
+                            EglHelper.logEglErrorAsWarning("GLThread", "eglSwapBuffers", swapError);
 
-                        synchronized(mGLThreadManager) {
-                            mSurfaceIsBad = true;
-                            mGLThreadManager.notifyAll();
-                        }
-                        break;
+                            synchronized (mGLThreadManager) {
+                                mSurfaceIsBad = true;
+                                mGLThreadManager.notifyAll();
+                            }
+                            break;
+                    }
                 }
 
                 if (wantRenderNotification) {
