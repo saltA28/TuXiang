@@ -59,7 +59,7 @@ class GLThread extends Thread {
 
         stuff = mGLStuffWeakRef.get();
         if (stuff != null) {
-            stuff.getRenderer().onGLThreadStarts();
+            stuff.getRenderer().onGLThreadStart();
             stuff = null;
         }
 
@@ -70,7 +70,7 @@ class GLThread extends Thread {
         } finally {
             stuff = mGLStuffWeakRef.get();
             if (stuff != null) {
-                stuff.getRenderer().onGLThreadExits();
+                stuff.getRenderer().onGLThreadExit();
             }
             mGLThreadManager.threadExiting(this);
         }

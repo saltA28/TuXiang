@@ -133,7 +133,7 @@ public interface Renderer {
      * <p>
      * It is a good time to prepare resources.
      */
-    void onGLThreadStarts();
+    void onGLThreadStart();
 
     /**
      * Called when the GL thread exits.
@@ -142,7 +142,7 @@ public interface Renderer {
      * <p>
      * It is a good time to release resources.
      */
-    void onGLThreadExits();
+    void onGLThreadExit();
 
     /**
      * Called after {@link GLStuff#onPause()} called.
