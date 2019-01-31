@@ -22,18 +22,6 @@ import android.util.Log;
 
 final class GLThreadManager {
     private static final String TAG = "GLThreadManager";
-    private static final boolean LOG_DEBUG = false;
-
-    public static GLThreadManager sInstance;
-
-    public static GLThreadManager getInstance() {
-        if (sInstance == null) {
-            sInstance = new GLThreadManager();
-        }
-        return sInstance;
-    }
-
-    private GLThreadManager() {}
 
     public synchronized void threadExiting(GLThread thread) {
         if (GLStuff.LOG_THREADS) {
