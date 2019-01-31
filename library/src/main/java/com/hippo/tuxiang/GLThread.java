@@ -25,7 +25,7 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.opengles.GL10;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * A generic GL Thread. Takes care of initializing EGL and GL. Delegates
@@ -71,6 +71,7 @@ class GLThread extends Thread {
             stuff = mGLStuffWeakRef.get();
             if (stuff != null) {
                 stuff.getRenderer().onGLThreadExit();
+                stuff = null;
             }
             mGLThreadManager.threadExiting(this);
         }
@@ -118,6 +119,7 @@ class GLThread extends Thread {
             int w = 0;
             int h = 0;
             Runnable event = null;
+            Runnable finishDrawingRunnable = null;
 
             while (true) {
                 synchronized (mGLThreadManager) {
@@ -140,13 +142,14 @@ class GLThread extends Thread {
                             if (GLStuff.LOG_PAUSE_RESUME) {
                                 Log.i("GLThread", "mPaused is now " + mPaused + " tid=" + getId());
                             }
-                            final GLStuff stuff = mGLStuffWeakRef.get();
+                            GLStuff stuff = mGLStuffWeakRef.get();
                             if (stuff != null) {
                                 if (pausing) {
                                     stuff.getRenderer().onGLThreadPause();
                                 } else {
                                     stuff.getRenderer().onGLThreadResume();
                                 }
+                                stuff = null;
                             }
                         }
 
@@ -178,22 +181,13 @@ class GLThread extends Thread {
 
                         // When pausing, optionally release the EGL Context:
                         if (pausing && mHaveEglContext) {
-                            final GLStuff stuff = mGLStuffWeakRef.get();
-                            final boolean preserveEglContextOnPause = stuff != null && stuff.getPreserveEGLContextOnPause();
-                            if (!preserveEglContextOnPause || mGLThreadManager.shouldReleaseEGLContextWhenPausing()) {
+                            GLStuff stuff = mGLStuffWeakRef.get();
+                            boolean preserveEglContextOnPause = stuff == null ?
+                                    false : stuff.getPreserveEGLContextOnPause();
+                            if (!preserveEglContextOnPause) {
                                 stopEglContextLocked();
                                 if (GLStuff.LOG_SURFACE) {
                                     Log.i("GLThread", "releasing EGL context because paused tid=" + getId());
-                                }
-                            }
-                        }
-
-                        // When pausing, optionally terminate EGL:
-                        if (pausing) {
-                            if (mGLThreadManager.shouldTerminateEGLWhenPausing()) {
-                                mEglHelper.finish();
-                                if (GLStuff.LOG_SURFACE) {
-                                    Log.i("GLThread", "terminating EGL because paused tid=" + getId());
                                 }
                             }
                         }
@@ -230,6 +224,11 @@ class GLThread extends Thread {
                             mGLThreadManager.notifyAll();
                         }
 
+                        if (mFinishDrawingRunnable != null) {
+                            finishDrawingRunnable = mFinishDrawingRunnable;
+                            mFinishDrawingRunnable = null;
+                        }
+
                         // Ready to draw?
                         if (readyToDraw()) {
 
@@ -237,7 +236,7 @@ class GLThread extends Thread {
                             if (! mHaveEglContext) {
                                 if (askedToReleaseEglContext) {
                                     askedToReleaseEglContext = false;
-                                } else if (mGLThreadManager.tryAcquireEglContextLocked(this)) {
+                                } else {
                                     try {
                                         mEglHelper.start();
                                     } catch (RuntimeException t) {
@@ -281,6 +280,13 @@ class GLThread extends Thread {
                                     wantRenderNotification = true;
                                 }
                                 break;
+                            }
+                        } else {
+                            if (finishDrawingRunnable != null) {
+                                Log.w("GLThread", "Warning, !readyToDraw() but waiting for " +
+                                    "draw finished! Early reporting draw finished.");
+                                finishDrawingRunnable.run();
+                                finishDrawingRunnable = null;
                             }
                         }
 
@@ -332,7 +338,6 @@ class GLThread extends Thread {
                 if (createGlInterface) {
                     gl = (GL10) mEglHelper.createGL();
 
-                    mGLThreadManager.checkGLDriver(gl);
                     createGlInterface = false;
                 }
 
@@ -340,9 +345,10 @@ class GLThread extends Thread {
                     if (GLStuff.LOG_RENDERER) {
                         Log.w("GLThread", "onSurfaceCreated");
                     }
-                    final GLStuff stuff = mGLStuffWeakRef.get();
+                    GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         stuff.getRenderer().onSurfaceCreated(gl, mEglHelper.mEglConfig);
+                        stuff = null;
                     }
                     createEglContext = false;
                 }
@@ -351,9 +357,10 @@ class GLThread extends Thread {
                     if (GLStuff.LOG_RENDERER) {
                         Log.w("GLThread", "onSurfaceChanged(" + w + ", " + h + ")");
                     }
-                    final GLStuff stuff = mGLStuffWeakRef.get();
+                    GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         stuff.getRenderer().onSurfaceChanged(gl, w, h);
+                        stuff = null;
                     }
                     sizeChanged = false;
                 }
@@ -363,9 +370,14 @@ class GLThread extends Thread {
                 }
                 boolean drew = false;
                 {
-                    final GLStuff stuff = mGLStuffWeakRef.get();
+                    GLStuff stuff = mGLStuffWeakRef.get();
                     if (stuff != null) {
                         drew = stuff.getRenderer().onDrawFrame(gl);
+                        stuff = null;
+                        if (finishDrawingRunnable != null) {
+                            finishDrawingRunnable.run();
+                            finishDrawingRunnable = null;
+                        }
                     }
                 }
                 if (drew) {
@@ -444,6 +456,25 @@ class GLThread extends Thread {
         }
     }
 
+    public void requestRenderAndNotify(Runnable finishDrawing) {
+        synchronized(mGLThreadManager) {
+            // If we are already on the GL thread, this means a client callback
+            // has caused reentrancy, for example via updating the SurfaceView parameters.
+            // We will return to the client rendering code, so here we don't need to
+            // do anything.
+            if (Thread.currentThread() == this) {
+                return;
+            }
+
+            mWantRenderNotification = true;
+            mRequestRender = true;
+            mRenderComplete = false;
+            mFinishDrawingRunnable = finishDrawing;
+
+            mGLThreadManager.notifyAll();
+        }
+    }
+
     public void requestRenderAndWait() {
         synchronized(mGLThreadManager) {
             // If we are already on the GL thread, this means a client callback
@@ -467,7 +498,6 @@ class GLThread extends Thread {
                     Thread.currentThread().interrupt();
                 }
             }
-
         }
     }
 
@@ -640,6 +670,7 @@ class GLThread extends Thread {
     private boolean mRenderComplete;
     private final ArrayList<Runnable> mEventQueue = new ArrayList<>();
     private boolean mSizeChanged = true;
+    private Runnable mFinishDrawingRunnable = null;
 
     // End of member variables protected by the mGLThreadManager monitor.
 

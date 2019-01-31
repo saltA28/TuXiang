@@ -31,7 +31,7 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * An EGL helper class.

@@ -20,7 +20,7 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * Choose a configuration with exactly the specified r,g,b,a sizes,

@@ -171,7 +171,7 @@ public class GLTextureView extends TextureView implements GLStuff, TextureView.S
 
     /**
      * This method is part of the {@link android.view.TextureView.SurfaceTextureListener}
-     * interface, and is not normally called or subclassed by clients of GLSurfaceView.
+     * interface, and is not normally called or subclassed by clients of GLTextureView.
      */
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -181,7 +181,7 @@ public class GLTextureView extends TextureView implements GLStuff, TextureView.S
 
     /**
      * This method is part of the {@link android.view.TextureView.SurfaceTextureListener}
-     * interface, and is not normally called or subclassed by clients of GLSurfaceView.
+     * interface, and is not normally called or subclassed by clients of GLTextureView.
      */
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
@@ -190,7 +190,7 @@ public class GLTextureView extends TextureView implements GLStuff, TextureView.S
 
     /**
      * This method is part of the {@link android.view.TextureView.SurfaceTextureListener}
-     * interface, and is not normally called or subclassed by clients of GLSurfaceView.
+     * interface, and is not normally called or subclassed by clients of GLTextureView.
      */
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
@@ -201,7 +201,7 @@ public class GLTextureView extends TextureView implements GLStuff, TextureView.S
 
     /**
      * This method is part of the {@link android.view.TextureView.SurfaceTextureListener}
-     * interface, and is not normally called or subclassed by clients of GLSurfaceView.
+     * interface, and is not normally called or subclassed by clients of GLTextureView.
      */
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
@@ -225,7 +225,7 @@ public class GLTextureView extends TextureView implements GLStuff, TextureView.S
 
     /**
      * This method is used as part of the View class and is not normally
-     * called or subclassed by clients of GLSurfaceView.
+     * called or subclassed by clients of GLTextureView.
      */
     @Override
     protected void onAttachedToWindow() {

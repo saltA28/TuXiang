@@ -23,7 +23,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 public class DefaultContextFactory implements EGLContextFactory {
 

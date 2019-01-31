@@ -16,7 +16,7 @@
 
 package com.hippo.tuxiang;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * This class will choose a RGB_888 surface with

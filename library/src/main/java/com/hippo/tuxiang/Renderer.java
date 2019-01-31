@@ -19,7 +19,7 @@ package com.hippo.tuxiang;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * A generic renderer interface.

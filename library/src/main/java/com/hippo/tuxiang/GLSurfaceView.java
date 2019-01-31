@@ -24,7 +24,7 @@ import android.view.SurfaceView;
 
 import java.lang.ref.WeakReference;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 /**
  * An implementation of SurfaceView that uses the dedicated surface for
@@ -77,7 +77,7 @@ import java.lang.ref.WeakReference;
  * <p>
  * <h4>Choosing an EGL Configuration</h4>
  * A given Android device may support multiple EGLConfig rendering configurations.
- * The available configurations may differ in how may channels of data are present, as
+ * The available configurations may differ in how many channels of data are present, as
  * well as how many bits are allocated to each channel. Therefore, the first thing
  * GLSurfaceView has to do when starting to render is choose what EGLConfig to use.
  * <p>
@@ -105,9 +105,9 @@ import java.lang.ref.WeakReference;
  * {@link #setRenderMode}. The default is continuous rendering.
  * <p>
  * <h3>Activity Life-cycle</h3>
- * A GLSurfaceView must be notified when the activity is paused and resumed. GLSurfaceView clients
- * are required to call {@link #onPause()} when the activity pauses and
- * {@link #onResume()} when the activity resumes. These calls allow GLSurfaceView to
+ * A GLSurfaceView must be notified when to pause and resume rendering. GLSurfaceView clients
+ * are required to call {@link #onPause()} when the activity stops and
+ * {@link #onResume()} when the activity starts. These calls allow GLSurfaceView to
  * pause and resume the rendering thread, and also allow GLSurfaceView to release and recreate
  * the OpenGL display.
  * <p>
@@ -319,7 +319,7 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     }
 
     /**
-     * This method is part of the SurfaceHolder.Callback interface, and is
+     * This method is part of the SurfaceHolder.Callback2 interface, and is
      * not normally called or subclassed by clients of GLSurfaceView.
      */
     @Override
@@ -328,7 +328,7 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     }
 
     /**
-     * This method is part of the SurfaceHolder.Callback interface, and is
+     * This method is part of the SurfaceHolder.Callback2 interface, and is
      * not normally called or subclassed by clients of GLSurfaceView.
      */
     @Override
@@ -338,7 +338,7 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     }
 
     /**
-     * This method is part of the SurfaceHolder.Callback interface, and is
+     * This method is part of the SurfaceHolder.Callback2 interface, and is
      * not normally called or subclassed by clients of GLSurfaceView.
      */
     @Override
@@ -347,7 +347,18 @@ public class GLSurfaceView extends SurfaceView implements GLStuff, SurfaceHolder
     }
 
     /**
-     * This method is part of the SurfaceHolder.Callback interface, and is
+     * This method is part of the SurfaceHolder.Callback2 interface, and is
+     * not normally called or subclassed by clients of GLSurfaceView.
+     */
+    @Override
+    public void surfaceRedrawNeededAsync(SurfaceHolder holder, Runnable finishDrawing) {
+        if (mGLThread != null) {
+            mGLThread.requestRenderAndNotify(finishDrawing);
+        }
+    }
+
+    /**
+     * This method is part of the SurfaceHolder.Callback2 interface, and is
      * not normally called or subclassed by clients of GLSurfaceView.
      */
     @Override

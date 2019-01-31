@@ -18,7 +18,7 @@ package com.hippo.tuxiang;
 
 import javax.microedition.khronos.opengles.GL;
 
-// android-7.0.0_r1
+// android-9.0.0_r30
 
 public interface GLStuff {
 
@@ -93,14 +93,33 @@ public interface GLStuff {
     GLWrapper getGLWrapper();
 
     /**
+     * Set the debug flags to a new value. The value is
+     * constructed by OR-together zero or more
+     * of the DEBUG_CHECK_* constants. The debug flags take effect
+     * whenever a surface is created. The default value is zero.
+     * @param debugFlags the new debug flags
+     * @see #DEBUG_CHECK_GL_ERROR
+     * @see #DEBUG_LOG_GL_CALLS
+     */
+    void setDebugFlags(int debugFlags);
+
+    /**
+     * Get the current value of the debug flags.
+     * @return the current value of the debug flags.
+     */
+    int getDebugFlags();
+
+    /**
      * Control whether the EGL context is preserved when the GLSurfaceView is paused and
      * resumed.
      * <p>
      * If set to true, then the EGL context may be preserved when the GLSurfaceView is paused.
-     * Whether the EGL context is actually preserved or not depends upon whether the
-     * Android device that the program is running on can support an arbitrary number of EGL
-     * contexts or not. Devices that can only support a limited number of EGL contexts must
-     * release the  EGL context in order to allow multiple applications to share the GPU.
+     * <p>
+     * Prior to API level 11, whether the EGL context is actually preserved or not
+     * depends upon whether the Android device can support an arbitrary number of
+     * EGL contexts or not. Devices that can only support a limited number of EGL
+     * contexts must release the EGL context in order to allow multiple applications
+     * to share the GPU.
      * <p>
      * If set to false, the EGL context will be released when the GLSurfaceView is paused,
      * and recreated when the GLSurfaceView is resumed.
@@ -116,21 +135,6 @@ public interface GLStuff {
      * @return true if the EGL context will be preserved when paused
      */
     boolean getPreserveEGLContextOnPause();
-
-    /**
-     * Set the debug flags to a new value. The value is
-     * constructed by OR-together zero or more
-     * of the DEBUG_CHECK_* constants. The debug flags take effect
-     * whenever a surface is created. The default value is zero.
-     * @param debugFlags the new debug flags
-     */
-    void setDebugFlags(int debugFlags);
-
-    /**
-     * Get the current value of the debug flags.
-     * @return the current value of the debug flags.
-     */
-    int getDebugFlags();
 
     /**
      * Set the renderer associated with this view. Also starts the thread that
@@ -284,18 +288,24 @@ public interface GLStuff {
     void requestRender();
 
     /**
-     * Inform the view that the activity is paused. The owner of this view must
-     * call this method when the activity is paused. Calling this method will
-     * pause the rendering thread.
+     * Pause the rendering thread, optionally tearing down the EGL context
+     * depending upon the value of {@link #setPreserveEGLContextOnPause(boolean)}.
+     *
+     * This method should be called when it is no longer desirable for the
+     * GLSurfaceView to continue rendering, such as in response to
+     * {@link android.app.Activity#onStop Activity.onStop}.
+     *
      * Must not be called before a renderer has been set.
      */
     void onPause();
 
     /**
-     * Inform the view that the activity is resumed. The owner of this view must
-     * call this method when the activity is resumed. Calling this method will
-     * recreate the OpenGL display and resume the rendering
-     * thread.
+     * Resumes the rendering thread, re-creating the OpenGL context if necessary. It
+     * is the counterpart to {@link #onPause()}.
+     *
+     * This method should typically be called in
+     * {@link android.app.Activity#onStart Activity.onStart}.
+     *
      * Must not be called before a renderer has been set.
      */
     void onResume();
