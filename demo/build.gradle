@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        applicationId 'com.hippo.tuxiang.example'
+        applicationId 'com.hippo.tuxiang.demo'
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 4
